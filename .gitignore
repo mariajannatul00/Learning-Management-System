@@ -1,0 +1,70 @@
+# Generated .gitignore for Visual Studio / .NET projects
+# See https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+## Ignore Visual Studio temporary files, build results, and user-specific files
+/.vs/
+*/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build folders
+/bin/
+/obj/
+**/bin/
+**/obj/
+
+## Visual Studio cache/options
+*.VC.db
+*.VC.VC.opendb
+
+## Rider
+/.idea/
+*.sln.iml
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Files built by Visual Studio
+*.dll
+*.exe
+*.pdb
+
+## NuGet
+# NuGet packages
+/packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## DotNet publish output
+/publish/
+
+## Runtime files
+*.log
+*.vspscc
+*.vssscc
+
+## User-specific files
+*.rsuser
+*.DotSettings.user
+
+## Resharper
+_ReSharper*/
+*.DotSettings.user
+
+## SQL Server files
+*.mdf
+*.ldf
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Visual Studio Code workspace
+/.vscode/
+
+## User secrets and local config
+appsettings.Development.json

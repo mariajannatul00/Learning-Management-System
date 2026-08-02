@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Admin Overview</h2>
+        <p class="text-muted small mb-0">System metric highlights and quick management links.</p>
+    </div>
+    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-user-shield me-1"></i> Admin Portal
+    </span>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card card-custom p-4 border-start border-primary border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase">Total Users</div>
+                    <div class="h2 fw-bold text-dark mb-0">@ViewBag.TotalUsers</div>
+                </div>
+                <div class="bg-primary-subtle text-primary p-3 rounded-circle">
+                    <i class="fa-solid fa-users fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom p-4 border-start border-success border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase">Active Users</div>
+                    <div class="h2 fw-bold text-dark mb-0">@ViewBag.TotalActiveUsers</div>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-circle">
+                    <i class="fa-solid fa-user-check fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom p-4 border-start border-warning border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase">System Roles</div>
+                    <div class="h2 fw-bold text-dark mb-0">@ViewBag.TotalRoles</div>
+                </div>
+                <div class="bg-warning-subtle text-warning p-3 rounded-circle">
+                    <i class="fa-solid fa-shield-halved fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom p-4">
+    <h5 class="fw-bold mb-3"><i class="fa-solid fa-gears me-2 text-primary"></i> Module 1 Authentication Status</h5>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fa-solid fa-circle-check fa-xl me-3"></i>
+        <div>
+            <strong>Module 1: Authentication Fully Implemented!</strong>
+            <p class="mb-0 small">User registration, login, logout, password resets, profile management, role seeding, and ASP.NET Core Identity integration complete.</p>
+        </div>
+    </div>
+</div>
