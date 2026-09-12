@@ -19,7 +19,7 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="InstructorId" />
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                <div asp-validation-summary="All" class="alert alert-danger py-2 small" role="alert"></div>
 
                 <div class="mb-3">
                     <label asp-for="Title" class="form-label fw-semibold small text-secondary">Course Title <span class="text-danger">*</span></label>
@@ -74,10 +74,12 @@
                     <div class="col-md-6">
                         <label asp-for="DurationHours" class="form-label fw-semibold small text-secondary">Duration (Hours)</label>
                         <input asp-for="DurationHours" type="number" step="0.5" class="form-control" />
+                        <span asp-validation-for="DurationHours" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="TotalLectures" class="form-label fw-semibold small text-secondary">Total Lectures</label>
                         <input asp-for="TotalLectures" type="number" class="form-control" />
+                        <span asp-validation-for="TotalLectures" class="text-danger small"></span>
                     </div>
                 </div>
 

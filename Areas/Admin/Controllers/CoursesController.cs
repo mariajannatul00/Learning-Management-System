@@ -51,6 +51,26 @@ namespace LMS.Web.Areas.Admin.Controllers
             ModelState.Remove(nameof(Course.Category));
             ModelState.Remove(nameof(Course.Enrollments));
 
+            if (course.StartDate.HasValue && course.StartDate.Value.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(Course.StartDate), "Course start date cannot be in the past.");
+            }
+
+            if (course.StartDate.HasValue && course.EndDate.HasValue && course.EndDate.Value.Date < course.StartDate.Value.Date)
+            {
+                ModelState.AddModelError(nameof(Course.EndDate), "Course end date cannot be before the start date.");
+            }
+
+            if (course.DiscountPrice.HasValue && course.DiscountPrice.Value > course.Price)
+            {
+                ModelState.AddModelError(nameof(Course.DiscountPrice), "Discount price must be lower than or equal to the regular price.");
+            }
+
+            if (course.TotalLectures <= 0)
+            {
+                ModelState.AddModelError(nameof(Course.TotalLectures), "Total lectures must be a positive number.");
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _courseService.GetAllCategoriesAsync();
@@ -93,6 +113,26 @@ namespace LMS.Web.Areas.Admin.Controllers
             ModelState.Remove(nameof(Course.Instructor));
             ModelState.Remove(nameof(Course.Category));
             ModelState.Remove(nameof(Course.Enrollments));
+
+            if (course.StartDate.HasValue && course.StartDate.Value.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(Course.StartDate), "Course start date cannot be in the past.");
+            }
+
+            if (course.StartDate.HasValue && course.EndDate.HasValue && course.EndDate.Value.Date < course.StartDate.Value.Date)
+            {
+                ModelState.AddModelError(nameof(Course.EndDate), "Course end date cannot be before the start date.");
+            }
+
+            if (course.DiscountPrice.HasValue && course.DiscountPrice.Value > course.Price)
+            {
+                ModelState.AddModelError(nameof(Course.DiscountPrice), "Discount price must be lower than or equal to the regular price.");
+            }
+
+            if (course.TotalLectures <= 0)
+            {
+                ModelState.AddModelError(nameof(Course.TotalLectures), "Total lectures must be a positive number.");
+            }
 
             if (!ModelState.IsValid)
             {
