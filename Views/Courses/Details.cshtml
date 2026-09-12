@@ -1,0 +1,239 @@
+@model LMS.Web.ViewModels.Course.CourseDetailsViewModel
+@{
+    ViewData["Title"] = Model.Course.Title;
+}
+
+<style>
+    .course-details-hero {
+        background: #0f172a;
+        color: white;
+        border-radius: 1.5rem;
+        padding: 3rem 2.5rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-details-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(79, 70, 229, 0.3) 0%, rgba(6, 182, 212, 0) 70%);
+        pointer-events: none;
+    }
+
+    .video-player-container {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        background: #000;
+    }
+
+    .sidebar-card {
+        border-radius: 1.25rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 15px 35px -5px rgba(0,0,0,0.08);
+        background: white;
+        position: sticky;
+        top: 6rem;
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="Index">Courses</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="Index" asp-route-categoryId="@Model.Course.CategoryId">@Model.Course.Category?.Name</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Course.Title</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Left Column: Main Course Content & Video -->
+    <div class="col-lg-8">
+        <!-- Hero Section -->
+        <div class="course-details-hero">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold">
+                    <i class="@Model.Course.Category?.IconClass me-1"></i> @Model.Course.Category?.Name
+                </span>
+                <span class="badge bg-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-semibold">
+                    @Model.Course.Level Level
+                </span>
+            </div>
+
+            <h1 class="fw-extrabold display-6 mb-3">@Model.Course.Title</h1>
+            <p class="lead text-light opacity-90 fs-6 mb-4">@Model.Course.ShortDescription</p>
+
+            <div class="d-flex flex-wrap align-items-center gap-4 text-white-50 small">
+                <div class="d-flex align-items-center gap-2 text-white">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;">
+                        @(Model.Course.Instructor?.FirstName?.FirstOrDefault() ?? 'I')
+                    </div>
+                    <div>
+                        <div class="small text-white-50 lh-1">Created by</div>
+                        <div class="fw-semibold text-white">@(Model.Course.Instructor?.FirstName) @(Model.Course.Instructor?.LastName)</div>
+                    </div>
+                </div>
+
+
+
+                <div>
+                    <i class="fa-regular fa-clock me-1"></i> @Model.Course.DurationHours Hours
+                </div>
+
+                <div>
+                    <i class="fa-solid fa-layer-group me-1"></i> @Model.Course.TotalLectures Lectures
+                </div>
+
+                @if (Model.Course.StartDate.HasValue && Model.Course.EndDate.HasValue)
+                {
+                    <div class="badge bg-light text-dark px-3 py-2 rounded-pill font-monospace">
+                        <i class="fa-regular fa-calendar-days me-1 text-primary"></i> Timeline: @Model.Course.StartDate.Value.ToString("MMM dd, yyyy") – @Model.Course.EndDate.Value.ToString("MMM dd, yyyy")
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Introductory Video Section -->
+        <div class="card card-custom p-4 mb-4">
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-circle-play text-primary me-2"></i> Course Introductory Preview Video</h4>
+            <div class="video-player-container ratio ratio-16x9 mb-3">
+                <video controls poster="@Model.Course.ThumbnailUrl" class="w-100 h-100">
+                    <source src="@Model.Course.IntroVideoUrl" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <p class="small text-muted mb-0"><i class="fa-solid fa-circle-info me-1"></i> Watch this introductory preview to learn about course modules, project objectives, and key skills you'll gain.</p>
+        </div>
+
+        <!-- Course Description & Syllabus -->
+        <div class="card card-custom p-4 mb-4">
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-file-lines text-primary me-2"></i> Course Overview</h4>
+            <div class="text-secondary leading-relaxed mb-4">
+                @Html.Raw(Model.Course.Description.Replace("\n", "<br/>"))
+            </div>
+
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-check text-success me-2"></i> Key Highlights</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                        <span>Hands-on real-world projects & clean architecture principles.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                        <span>Full lifetime access to course updates and lecture materials.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                        <span>Certificate of Completion upon finishing all modules.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                        <span>Direct Q&A access to course instructor and community forums.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Pricing & Purchase Sidebar -->
+    <div class="col-lg-4">
+        <div class="sidebar-card p-4">
+            <div class="mb-3">
+                <div class="d-flex align-items-baseline gap-2">
+                    @if (Model.Course.DiscountPrice.HasValue)
+                    {
+                        <span class="h1 fw-extrabold text-dark mb-0">৳@Model.Course.DiscountPrice.Value.ToString("F2")</span>
+                        <span class="h4 text-muted text-decoration-line-through mb-0">৳@Model.Course.Price.ToString("F2")</span>
+                        <span class="badge bg-danger-subtle text-danger ms-auto fw-bold">SALE</span>
+                    }
+                    else
+                    {
+                        <span class="h1 fw-extrabold text-dark mb-0">৳@Model.Course.Price.ToString("F2")</span>
+                    }
+                </div>
+            </div>
+
+            @if (Model.IsUserEnrolled)
+            {
+                <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check fa-lg me-2"></i>
+                    <div>
+                        <strong>You own this course!</strong>
+                        <div class="small">You are currently enrolled.</div>
+                    </div>
+                </div>
+                <a href="#video-player-container" class="btn btn-success w-100 py-3 fw-bold rounded-3 shadow-sm mb-3">
+                    <i class="fa-solid fa-graduation-cap me-2"></i> Start Learning Now
+                </a>
+            }
+            else if (Model.Course.IsEnded)
+            {
+                <div class="alert alert-danger mb-3 py-3 rounded-3 text-center">
+                    <i class="fa-solid fa-clock-rotate-left fa-xl mb-2 text-danger"></i>
+                    <div class="fw-bold">Course Timeline Ended</div>
+                    <div class="small">Purchases and enrollments are closed for this course timeline.</div>
+                </div>
+            }
+            else
+            {
+                <form asp-controller="Courses" asp-action="Buy" method="post" class="mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold rounded-3 fs-5 shadow-sm">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> Buy Course Now
+                    </button>
+                </form>
+                <div class="text-center small text-muted mb-4">
+                    <i class="fa-solid fa-shield-halved text-success me-1"></i> SSLCommerz Secured Payment
+                </div>
+            }
+
+            <hr class="my-4">
+
+            <!-- Course Drop Policy Info -->
+            <div class="bg-light p-3 rounded-3 mb-4 border">
+                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-file-contract text-warning me-1"></i> Course Drop Refund Policy</h6>
+                <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-1">
+                    <li>• <strong>10% deduction:</strong> Before course start date</li>
+                    <li>• <strong>25% deduction:</strong> Before 1/4th of timeline</li>
+                    <li>• <strong>50% deduction:</strong> Before 1/2th of timeline</li>
+                    <li>• <strong>80% deduction:</strong> Before 3/4th of timeline</li>
+                    <li>• <strong>No refund:</strong> After 3/4th or course end</li>
+                </ul>
+            </div>
+
+            <h6 class="fw-bold mb-3">This course includes:</h6>
+            <ul class="list-unstyled d-flex flex-column gap-3 small text-secondary mb-0">
+                <li class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-circle-play text-primary"></i> @Model.Course.DurationHours hours on-demand video
+                </li>
+                <li class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-file-code text-primary"></i> @Model.Course.TotalLectures downloadable resources & code
+                </li>
+                <li class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-infinity text-primary"></i> Full lifetime access
+                </li>
+                <li class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen text-primary"></i> Access on mobile and TV
+                </li>
+                <li class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-award text-primary"></i> Certificate of completion
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+

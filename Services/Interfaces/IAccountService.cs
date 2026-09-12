@@ -8,7 +8,7 @@ namespace LMS.Web.Services.Interfaces
 {
     public interface IAccountService
     {
-        Task<IdentityResult> RegisterUserAsync(RegisterViewModel model);
+        Task<(IdentityResult Result, ApplicationUser? User)> RegisterUserAsync(RegisterViewModel model);
         Task<SignInResult> LoginAsync(LoginViewModel model);
         Task LogoutAsync();
         Task<ApplicationUser?> GetCurrentUserAsync(ClaimsPrincipal userPrincipal);
@@ -17,5 +17,7 @@ namespace LMS.Web.Services.Interfaces
         Task<IdentityResult> ChangePasswordAsync(string userId, ChangePasswordViewModel model);
         Task<string> GeneratePasswordResetTokenAsync(string email);
         Task<IdentityResult> ResetPasswordAsync(ResetPasswordViewModel model);
+        Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user);
+        Task<IdentityResult> ConfirmEmailAsync(string userId, string code);
     }
 }

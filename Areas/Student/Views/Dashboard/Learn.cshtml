@@ -1,0 +1,172 @@
+@model LMS.Web.ViewModels.Student.CourseLearnViewModel
+@{
+    ViewData["Title"] = "Learn - " + Model.Course.Title;
+    var activeVideoUrl = !string.IsNullOrEmpty(Model.ActiveLesson?.VideoUrl) ? Model.ActiveLesson.VideoUrl : Model.Course.IntroVideoUrl;
+    var activeTitle = Model.ActiveLesson != null ? Model.ActiveLesson.Title : "Course Intro Video";
+    var activeSummary = Model.ActiveLesson != null ? Model.ActiveLesson.ContentSummary : Model.Course.ShortDescription;
+}
+
+<style>
+    .player-container {
+        background: #0f172a;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    
+    .lesson-item {
+        border-left: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .lesson-item.active {
+        border-left-color: var(--primary-color);
+        background-color: rgba(79, 70, 229, 0.08);
+    }
+
+    .lesson-item:hover {
+        background-color: #f8fafc;
+    }
+</style>
+
+<!-- Top Navigation & Progress -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+    <div>
+        <a asp-action="Index" class="text-decoration-none text-muted small fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+        <h3 class="fw-bold text-dark mb-0">@Model.Course.Title</h3>
+    </div>
+    @if (Model.TotalLessons > 0)
+    {
+        <div style="min-width: 220px;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small text-muted fw-semibold">Course Progress</span>
+                <span class="small text-primary fw-bold">@Model.ProgressPercentage% (@Model.CompletedLessonsCount/@Model.TotalLessons)</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: @Model.ProgressPercentage%;" aria-valuenow="@Model.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Video Theater Player & Lesson Details -->
+    <div class="col-lg-8">
+        <div class="player-container ratio ratio-16x9 mb-4">
+            <video id="mainVideoPlayer" controls controlsList="nodownload" class="w-100 h-100" poster="@Model.Course.ThumbnailUrl" autoplay>
+                <source src="@activeVideoUrl" type="video/mp4" />
+                Your browser does not support HTML5 video playback.
+            </video>
+        </div>
+
+        <div class="card card-custom p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small mb-1">
+                        <i class="@Model.Course.Category?.IconClass me-1"></i> @Model.Course.Category?.Name
+                    </span>
+                    <h4 class="fw-bold text-dark mb-0" id="currentLessonTitle">@activeTitle</h4>
+                </div>
+
+                @if (Model.ActiveLesson != null)
+                {
+                    var isCompleted = Model.CompletedLessonIds.Contains(Model.ActiveLesson.Id);
+                    <form asp-action="ToggleLesson" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="lessonId" value="@Model.ActiveLesson.Id" />
+                        <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                        <button type="submit" class="btn btn-sm @(isCompleted ? "btn-success" : "btn-outline-primary") rounded-pill px-3">
+                            <i class="fa-solid @(isCompleted ? "fa-circle-check" : "fa-circle") me-1"></i>
+                            @(isCompleted ? "Marked as Completed" : "Mark as Completed")
+                        </button>
+                    </form>
+                }
+            </div>
+
+            <p class="text-secondary mb-3" id="currentLessonSummary">
+                @activeSummary
+            </p>
+
+            <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="small text-muted">
+                    <i class="fa-solid fa-user me-1 text-primary"></i> Instructor: <strong>@(Model.Course.Instructor?.FirstName) @(Model.Course.Instructor?.LastName)</strong>
+                </div>
+                <div class="small text-muted">
+                    <i class="fa-regular fa-clock me-1 text-primary"></i> Duration: @Model.Course.DurationHours Hours
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Course Curriculum & Modules Sidebar -->
+    <div class="col-lg-4">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-layer-group text-primary me-2"></i> Course Modules & Lessons</h5>
+
+            <div class="alert alert-info py-2 small d-flex align-items-center mb-4">
+                <i class="fa-solid fa-circle-info fa-lg me-2"></i>
+                <div>Click on any video lecture below to play it.</div>
+            </div>
+
+            @if (!Model.Modules.Any())
+            {
+                <div class="p-3 text-center text-muted small">
+                    No modules or extra video lectures available for this course yet. Watching intro video preview.
+                </div>
+            }
+            else
+            {
+                <!-- Modules Accordion -->
+                <div class="accordion" id="modulesAccordion">
+                    @{ int modIndex = 0; }
+                    @foreach (var module in Model.Modules)
+                    {
+                        modIndex++;
+                        var isExpanded = Model.ActiveLesson != null && module.Lessons.Any(l => l.Id == Model.ActiveLesson.Id);
+                        <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                            <h2 class="accordion-header" id="heading_@module.Id">
+                                <button class="accordion-button @(isExpanded || modIndex == 1 ? "" : "collapsed") fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_@module.Id" aria-expanded="@(isExpanded || modIndex == 1 ? "true" : "false")">
+                                    <i class="fa-solid fa-folder-open me-2 text-primary"></i> @module.Title
+                                </button>
+                            </h2>
+                            <div id="collapse_@module.Id" class="accordion-collapse collapse @(isExpanded || modIndex == 1 ? "show" : "")" aria-labelledby="heading_@module.Id" data-bs-parent="#modulesAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var lesson in module.Lessons)
+                                        {
+                                            var isActive = Model.ActiveLesson?.Id == lesson.Id;
+                                            var isDone = Model.CompletedLessonIds.Contains(lesson.Id);
+                                            <a asp-action="Learn" asp-route-id="@Model.Course.Id" asp-route-lessonId="@lesson.Id" class="list-group-item p-3 lesson-item text-decoration-none @(isActive ? "active" : "")">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        @if (isDone)
+                                                        {
+                                                            <i class="fa-solid fa-circle-check text-success"></i>
+                                                        }
+                                                        else if (isActive)
+                                                        {
+                                                            <i class="fa-solid fa-circle-play text-primary"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fa-regular fa-circle-play text-muted"></i>
+                                                        }
+                                                        <span class="small fw-semibold text-dark">@lesson.Title</span>
+                                                    </div>
+                                                    <span class="badge bg-light text-muted border small">@lesson.DurationMinutes mins</span>
+
+                                                </div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -67,4 +67,13 @@ Thumbs.db
 /.vscode/
 
 ## User secrets and local config
+appsettings.json
 appsettings.Development.json
+appsettings.Local.json
+secrets.json
+.env
+.env.*
+
+## Uploaded / generated local content
+wwwroot/uploads/
+uploads/

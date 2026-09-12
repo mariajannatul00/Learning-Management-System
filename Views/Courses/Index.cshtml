@@ -1,0 +1,415 @@
+@model LMS.Web.ViewModels.Course.CourseExploreViewModel
+@{
+    ViewData["Title"] = "Explore Courses";
+}
+
+<!-- Custom Styles for Explore Courses Page -->
+<style>
+    .explore-hero {
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+        border-radius: 1.5rem;
+        padding: 3rem 2rem;
+        border: 1px solid rgba(79, 70, 229, 0.12);
+        margin-bottom: 2.5rem;
+    }
+
+    .category-pill {
+        border-radius: 2rem;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.25s ease;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #475569;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .category-pill:hover, .category-pill.active {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1);
+        color: white !important;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .course-card {
+        border-radius: 1.25rem;
+        border: 1px solid #e2e8f0;
+        background: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .course-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .thumbnail-wrapper {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 16/9;
+        background: #0f172a;
+    }
+
+    .thumbnail-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .course-card:hover .thumbnail-img {
+        transform: scale(1.05);
+    }
+
+    .video-play-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+
+    .course-card:hover .video-play-overlay {
+        opacity: 1;
+    }
+
+    .play-btn-circle {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: white;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+    }
+
+    .play-btn-circle:hover {
+        transform: scale(1.1);
+    }
+
+    .price-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+        color: white;
+        padding: 0.35rem 0.85rem;
+        border-radius: 2rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .level-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-uppercase;
+        padding: 0.25rem 0.65rem;
+        border-radius: 0.5rem;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="explore-hero">
+    <div class="row align-items-center">
+        <div class="col-lg-8 mb-4 mb-lg-0">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fw-semibold rounded-pill mb-3">
+                <i class="fa-solid fa-sparkles me-1"></i> Interactive Course Library
+            </span>
+            <h1 class="fw-extrabold display-5 text-dark mb-2">Explore Premium Courses</h1>
+            <p class="text-secondary lead fs-6 mb-0">
+                Enhance your career with industry-tailored courses. Watch video intros, inspect course details, and enroll instantly.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="bg-white p-3 rounded-4 shadow-sm border border-light text-center">
+                <div class="h3 fw-bold text-primary mb-0">@Model.TotalCoursesCount</div>
+                <div class="small text-muted fw-medium">Published Courses Available</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filters Form -->
+<form method="get" asp-controller="Courses" asp-action="Index" id="filterForm">
+    <!-- Category Pills -->
+    <div class="d-flex align-items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
+        <a href="@Url.Action("Index", "Courses", new { search = Model.Search, level = Model.Level, sortBy = Model.SortBy })" 
+           class="category-pill @(Model.CategoryId == null ? "active" : "")">
+            <i class="fa-solid fa-grid-2 me-1"></i> All Categories
+        </a>
+        @foreach (var cat in Model.Categories)
+        {
+            <a href="@Url.Action("Index", "Courses", new { categoryId = cat.Id, search = Model.Search, level = Model.Level, sortBy = Model.SortBy })" 
+               class="category-pill @(Model.CategoryId == cat.Id ? "active" : "")">
+                <i class="@cat.IconClass"></i> @cat.Name
+                <span class="badge bg-secondary-subtle text-dark rounded-pill ms-1">@cat.Courses.Count</span>
+            </a>
+        }
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <div class="row g-3 align-items-center">
+            <!-- Search Input -->
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted ps-3">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" name="search" value="@Model.Search" class="form-control border-start-0 ps-0" placeholder="Search by title or topic..." />
+                    @if (!string.IsNullOrEmpty(Model.Search))
+                    {
+                        <a href="@Url.Action("Index", "Courses", new { categoryId = Model.CategoryId, level = Model.Level, sortBy = Model.SortBy })" class="btn btn-outline-secondary border-start-0">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Level Filter -->
+            <div class="col-md-3">
+                <select name="level" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="all" selected="@(Model.Level == "all")">All Skill Levels</option>
+                    <option value="Beginner" selected="@(Model.Level == "Beginner")">Beginner</option>
+                    <option value="Intermediate" selected="@(Model.Level == "Intermediate")">Intermediate</option>
+                    <option value="Advanced" selected="@(Model.Level == "Advanced")">Advanced</option>
+                </select>
+            </div>
+
+            <!-- Sort By Filter -->
+            <div class="col-md-3">
+                <select name="sortBy" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="newest" selected="@(Model.SortBy == "newest")">Sort: Newest First</option>
+                    <option value="popular" selected="@(Model.SortBy == "popular")">Sort: Most Popular</option>
+                    <option value="price-low" selected="@(Model.SortBy == "price-low")">Sort: Price (Low to High)</option>
+                    <option value="price-high" selected="@(Model.SortBy == "price-high")">Sort: Price (High to Low)</option>
+
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Courses Grid -->
+@if (!Model.Courses.Any())
+{
+    <div class="card card-custom text-center p-5 my-4">
+        <div class="py-4">
+            <i class="fa-solid fa-book-open-reader fa-4x text-muted mb-3 opacity-50"></i>
+            <h4 class="fw-bold text-dark mb-2">No Courses Found</h4>
+            <p class="text-muted mb-4">We couldn't find any courses matching your search criteria.</p>
+            <a href="@Url.Action("Index", "Courses")" class="btn btn-primary-custom">
+                <i class="fa-solid fa-rotate-left me-1"></i> Reset Filters
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4 mb-5">
+        @foreach (var course in Model.Courses)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="course-card">
+                    <!-- Thumbnail & Video Trigger -->
+                    <div class="thumbnail-wrapper">
+                        <img src="@course.ThumbnailUrl" alt="@course.Title" class="thumbnail-img" />
+                        
+                        <!-- Price Badge -->
+                        <div class="price-badge">
+                            @if (course.DiscountPrice.HasValue)
+                            {
+                                <span class="text-warning">৳@course.DiscountPrice.Value.ToString("F2")</span>
+                                <small class="text-decoration-line-through text-white-50 ms-1" style="font-size: 0.75rem;">৳@course.Price.ToString("F2")</small>
+                            }
+                            else
+                            {
+                                <span>৳@course.Price.ToString("F2")</span>
+                            }
+                        </div>
+
+                        <!-- Video Overlay Play Button -->
+                        <div class="video-play-overlay" onclick="openVideoModal('@course.Title', '@course.IntroVideoUrl')">
+                            <div class="play-btn-circle">
+                                <i class="fa-solid fa-play fa-lg ms-1"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <!-- Category & Level -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small">
+                                <i class="@course.Category?.IconClass me-1"></i> @course.Category?.Name
+                            </span>
+                            @if (course.IsEnded)
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill small">
+                                    Ended
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border rounded-pill small">
+                                    @course.Level
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Title -->
+                        <h5 class="fw-bold mb-2">
+                            <a asp-action="Details" asp-route-id="@course.Id" class="text-dark text-decoration-none hover-primary text-truncate-2">
+                                @course.Title
+                            </a>
+                        </h5>
+
+                        <!-- Short Description -->
+                        <p class="text-muted small mb-3 flex-grow-1 text-truncate-3">
+                            @course.ShortDescription
+                        </p>
+
+                        <!-- Course Stats -->
+                        <div class="d-flex align-items-center gap-3 small text-muted mb-3 border-top border-bottom py-2">
+                            <div>
+                                <i class="fa-regular fa-clock text-primary me-1"></i> @course.DurationHours hrs
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-layer-group text-info me-1"></i> @course.TotalLectures lessons
+                            </div>
+                        </div>
+
+
+                        <!-- Instructor & Actions -->
+                        <div class="d-flex align-items-center justify-content-between mt-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-secondary-subtle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                    @(course.Instructor?.FirstName?.FirstOrDefault() ?? 'I')
+                                </div>
+                                <span class="small fw-semibold text-dark text-truncate" style="max-width: 110px;">
+                                    @(course.Instructor?.FirstName ?? "Instructor")
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-1">
+                                <!-- Watch Video Intro Button -->
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" 
+                                        onclick="openVideoModal('@course.Title.Replace("'", "\\'")', '@course.IntroVideoUrl')">
+                                    <i class="fa-solid fa-circle-play me-1"></i> Intro
+                                </button>
+                                
+                                <!-- Buy / Details Button -->
+                                @if (Model.EnrolledCourseIds.Contains(course.Id))
+                                {
+                                    <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-success rounded-pill px-3">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Enrolled
+                                    </a>
+                                }
+                                else if (course.IsEnded)
+                                {
+                                    <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                        Closed
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-primary-custom rounded-pill px-3">
+                                        Buy Now
+                                    </a>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Introductory Video Player Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-dark text-white">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="videoModalLabel">
+                    <i class="fa-solid fa-circle-play text-primary me-2"></i> Course Preview Video
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="closeVideoModal()"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="ratio ratio-16x9 rounded-3 overflow-hidden bg-black">
+                    <video id="courseVideoPlayer" controls controlsList="nodownload" class="w-100 h-100">
+                        <source id="videoSource" src="" type="video/mp4" />
+                        Your browser does not support HTML5 video playback.
+                    </video>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-between">
+                <small class="text-white-50"><i class="fa-solid fa-circle-info me-1"></i> Introductory preview video for course.</small>
+                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-4" data-bs-dismiss="modal" onclick="closeVideoModal()">Close Preview</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let videoModal = null;
+        let videoPlayer = null;
+        let videoSource = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+            videoPlayer = document.getElementById('courseVideoPlayer');
+            videoSource = document.getElementById('videoSource');
+
+            document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+                closeVideoModal();
+            });
+        });
+
+        function openVideoModal(title, videoUrl) {
+            document.getElementById('videoModalLabel').innerHTML = `<i class="fa-solid fa-circle-play text-primary me-2"></i> ${title}`;
+            videoSource.src = videoUrl;
+            videoPlayer.load();
+            videoModal.show();
+            videoPlayer.play().catch(e => console.log("Autoplay prevented:", e));
+        }
+
+        function closeVideoModal() {
+            if (videoPlayer) {
+                videoPlayer.pause();
+                videoSource.src = "";
+            }
+        }
+    </script>
+}

@@ -45,10 +45,22 @@ namespace LMS.Web.Controllers
                 return View(model);
             }
 
-            var result = await _accountService.RegisterUserAsync(model);
-            if (result.Succeeded)
+            var (result, user) = await _accountService.RegisterUserAsync(model);
+            if (result.Succeeded && user != null)
             {
-                TempData["SuccessMessage"] = "Registration successful! You can now log in to your account.";
+                var token = await _accountService.GenerateEmailConfirmationTokenAsync(user);
+                var confirmationLink = Url.Action(
+                    nameof(ConfirmEmail),
+                    "Account",
+                    new { userId = user.Id, code = token },
+                    protocol: Request.Scheme);
+
+                await _emailService.SendEmailAsync(
+                    user.Email!,
+                    "Confirm Your LearnPulse LMS Account",
+                    $"Please confirm your email address by clicking this link: <a href='{confirmationLink}'>Confirm Email</a>");
+
+                TempData["SuccessMessage"] = "Registration successful! A verification email link has been sent. Please confirm your email before logging in.";
                 return RedirectToAction(nameof(Login));
             }
 
@@ -58,6 +70,30 @@ namespace LMS.Web.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string? userId, string? code)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
+            {
+                ViewBag.IsConfirmed = false;
+                ViewBag.ErrorMessage = "Invalid email confirmation parameters.";
+                return View();
+            }
+
+            var result = await _accountService.ConfirmEmailAsync(userId, code);
+            if (result.Succeeded)
+            {
+                ViewBag.IsConfirmed = true;
+            }
+            else
+            {
+                ViewBag.IsConfirmed = false;
+                ViewBag.ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return View();
         }
 
         [HttpGet]

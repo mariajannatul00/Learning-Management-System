@@ -1,0 +1,236 @@
+@model IEnumerable<LMS.Web.Models.Enrollment>
+@{
+    ViewData["Title"] = "Course Drop Requests & Bank Statement";
+    var allRequests = ViewBag.AllRequests as IEnumerable<LMS.Web.Models.Enrollment> ?? new List<LMS.Web.Models.Enrollment>();
+    var statementRecords = ViewBag.StatementRecords as IEnumerable<LMS.Web.Models.Enrollment> ?? new List<LMS.Web.Models.Enrollment>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Course Drop Requests & SSLCommerz Bank Statement</h2>
+        <p class="text-muted small mb-0">Review student course drop requests, approve refunds, and view live SSLCommerz gateway bank statements.</p>
+    </div>
+    <div>
+        <a href="#bankStatementSection" class="btn btn-outline-primary rounded-pill px-3">
+            <i class="fa-solid fa-receipt me-1"></i> View SSLCommerz Bank Statement
+        </a>
+    </div>
+</div>
+
+<!-- Pending Requests Section -->
+<div class="card card-custom mb-5">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+        <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-hourglass-half text-warning me-2"></i> Pending Approval Requests</h5>
+        <span class="badge bg-warning text-dark px-3 py-2 fw-bold">@Model.Count() Pending</span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="fa-solid fa-check-double fa-3x mb-2 text-success opacity-50"></i>
+            <p class="mb-0">No pending course drop requests at this time.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Course</th>
+                        <th>Request Date</th>
+                        <th>Drop Reason</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">@request.Student?.FirstName @request.Student?.LastName</div>
+                                <div class="small text-muted">@request.Student?.Email</div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-primary">@request.Course?.Title</div>
+                                <div class="small text-muted">
+                                    Paid: ৳@request.PricePaid.ToString("F2") |
+                                    <span class="text-danger font-monospace">Refund: ৳@(request.RefundAmount > 0 ? request.RefundAmount.ToString("F2") : (request.PricePaid * 0.90m).ToString("F2")) (@request.DeductionPercentage% Ded.)</span>
+                                </div>
+                            </td>
+                            <td class="small text-muted">@request.DropRequestedAt?.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td style="max-width: 250px;">
+                                <span class="small text-secondary fst-italic">"@request.DropReason"</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <form asp-action="Approve" method="post" class="d-inline" onsubmit="return confirm('Approve drop request and issue SSLCommerz refund under course drop policy?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="enrollmentId" value="@request.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 me-1 text-white fw-semibold">
+                                        <i class="fa-solid fa-check me-1"></i> Approve & Refund
+                                    </button>
+                                </form>
+                                <form asp-action="Reject" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="enrollmentId" value="@request.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                        <i class="fa-solid fa-xmark me-1"></i> Reject
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- SSLCommerz Bank Statement Section -->
+<div class="card card-custom mb-5" id="bankStatementSection">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-building-columns text-primary me-2"></i> SSLCommerz Payment Gateway - Bank Statement
+        </h5>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-bold">
+            <i class="fa-solid fa-shield-halved me-1"></i> Store ID: lms6a7f32ae9cbfa (Sandbox)
+        </span>
+    </div>
+    
+    <div class="p-3 bg-light border-bottom d-flex justify-content-around text-center flex-wrap gap-3">
+        <div>
+            <span class="text-muted small d-block">Total Successful Payments</span>
+            <strong class="text-success fs-5">৳@statementRecords.Where(e => e.PaymentStatus == "Completed").Sum(e => e.PricePaid).ToString("F2")</strong>
+        </div>
+        <div class="border-start ps-3">
+            <span class="text-muted small d-block">Total Refunded Amount</span>
+            <strong class="text-danger fs-5">-৳@statementRecords.Where(e => e.PaymentStatus == "Refunded" || e.DropStatus == "Approved").Sum(e => e.RefundAmount > 0 ? e.RefundAmount : e.PricePaid).ToString("F2")</strong>
+        </div>
+        <div class="border-start ps-3">
+            <span class="text-muted small d-block">Net Balance</span>
+            <strong class="text-primary fs-5">৳@( (statementRecords.Where(e => e.PaymentStatus == "Completed").Sum(e => e.PricePaid) - statementRecords.Where(e => e.PaymentStatus == "Refunded" || e.DropStatus == "Approved").Sum(e => e.RefundAmount > 0 ? e.RefundAmount : e.PricePaid)).ToString("F2") )</strong>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Transaction ID</th>
+                    <th>Bank Tran ID</th>
+                    <th>Student Name</th>
+                    <th>Course Title</th>
+                    <th>Gateway Status</th>
+                    <th>Amount</th>
+                    <th class="text-end pe-4">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!statementRecords.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No SSLCommerz bank statement records found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var stmt in statementRecords)
+                    {
+                        var isRefund = stmt.DropStatus == "Approved" || stmt.PaymentStatus == "Refunded";
+                        var refundAmt = stmt.RefundAmount > 0 ? stmt.RefundAmount : stmt.PricePaid;
+                        <tr>
+                            <td class="ps-4">
+                                <span class="font-monospace small fw-bold text-dark">@stmt.TransactionId</span>
+                            </td>
+                            <td>
+                                <span class="font-monospace small text-secondary">@(string.IsNullOrEmpty(stmt.BankTranId) ? "N/A" : stmt.BankTranId)</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@stmt.Student?.FirstName @stmt.Student?.LastName</div>
+                                <div class="small text-muted">@stmt.Student?.Email</div>
+                            </td>
+                            <td><span class="small text-secondary">@stmt.Course?.Title</span></td>
+                            <td>
+                                @if (isRefund)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> REFUNDED
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                        <i class="fa-solid fa-check me-1"></i> VALIDATED
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (isRefund)
+                                {
+                                    <span class="fw-bold text-danger">-৳@refundAmt.ToString("F2")</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold text-success">+৳@stmt.PricePaid.ToString("F2")</span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4 small text-muted">
+                                @(isRefund ? stmt.DropApprovedAt?.ToString("MMM dd, yyyy HH:mm") : stmt.EnrolledAt.ToString("MMM dd, yyyy HH:mm"))
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Request History Section -->
+<div class="card card-custom">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> All Drop Requests History</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Student</th>
+                    <th>Course</th>
+                    <th>Requested</th>
+                    <th>Reason</th>
+                    <th class="text-end pe-4">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in allRequests)
+                {
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-semibold">@request.Student?.FirstName @request.Student?.LastName</div>
+                            <div class="small text-muted">@request.Student?.Email</div>
+                        </td>
+                        <td>@request.Course?.Title</td>
+                        <td class="small text-muted">@request.DropRequestedAt?.ToString("MMM dd, yyyy")</td>
+                        <td class="small text-secondary" style="max-width: 200px;">@request.DropReason</td>
+                        <td class="text-end pe-4">
+                            @if (request.DropStatus == "Approved")
+                            {
+                                <span class="badge bg-success">Approved & Refunded</span>
+                            }
+                            else if (request.DropStatus == "Rejected")
+                            {
+                                <span class="badge bg-danger">Rejected</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

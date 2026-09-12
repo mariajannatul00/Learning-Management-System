@@ -21,7 +21,8 @@ namespace LMS.Web.Areas.Admin.Controllers
         {
             ViewBag.TotalUsers = await _context.Users.CountAsync();
             ViewBag.TotalActiveUsers = await _context.Users.CountAsync(u => u.IsActive);
-            ViewBag.TotalRoles = await _context.Roles.CountAsync();
+            ViewBag.TotalCourses = await _context.Courses.CountAsync(c => !c.IsDeleted);
+            ViewBag.PendingDropRequests = await _context.Enrollments.CountAsync(e => e.DropStatus == "Pending" && !e.IsDeleted);
 
             return View();
         }

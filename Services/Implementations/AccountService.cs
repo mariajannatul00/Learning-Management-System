@@ -25,7 +25,7 @@ namespace LMS.Web.Services.Implementations
             _roleManager = roleManager;
         }
 
-        public async Task<IdentityResult> RegisterUserAsync(RegisterViewModel model)
+        public async Task<(IdentityResult Result, ApplicationUser? User)> RegisterUserAsync(RegisterViewModel model)
         {
             var user = new ApplicationUser
             {
@@ -40,13 +40,7 @@ namespace LMS.Web.Services.Implementations
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                string targetRole = string.IsNullOrWhiteSpace(model.Role) ? "Student" : model.Role;
-                
-                // Security guard: restrict registration to Instructor or Student via public form
-                if (targetRole != "Instructor" && targetRole != "Student")
-                {
-                    targetRole = "Student";
-                }
+                string targetRole = "Student";
 
                 if (!await _roleManager.RoleExistsAsync(targetRole))
                 {
@@ -54,9 +48,10 @@ namespace LMS.Web.Services.Implementations
                 }
 
                 await _userManager.AddToRoleAsync(user, targetRole);
+                return (result, user);
             }
 
-            return result;
+            return (result, null);
         }
 
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
@@ -164,6 +159,22 @@ namespace LMS.Web.Services.Implementations
             }
 
             return await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+        }
+
+        public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
+        {
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
+        public async Task<IdentityResult> ConfirmEmailAsync(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+            }
+
+            return await _userManager.ConfirmEmailAsync(user, code);
         }
     }
 }

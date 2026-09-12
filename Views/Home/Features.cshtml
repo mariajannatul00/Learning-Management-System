@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Platform Features - LearnPulse LMS";
+}
+
+<style>
+    .features-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        border-radius: 1.5rem;
+        color: white;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .features-hero::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0,0,0,0) 70%);
+        border-radius: 50%;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 1.25rem;
+        border: 1px solid #e2e8f0;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 35px -10px rgba(79, 70, 229, 0.15);
+        border-color: #c7d2fe;
+    }
+
+    .feature-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="features-hero text-center mb-5">
+    <div class="container position-relative z-1" style="max-width: 800px;">
+        <span class="badge bg-primary-subtle text-white border border-primary-subtle rounded-pill px-3 py-2 small mb-3">
+            <i class="fa-solid fa-sparkles me-1 text-warning"></i> Next-Gen Learning Ecosystem
+        </span>
+        <h1 class="display-4 fw-bold mb-3">Comprehensive LMS Features</h1>
+        <p class="lead text-light opacity-90 mb-4">
+            Discover all the powerful tools, secure payment gateways, refund tracking systems, and course management features built into LearnPulse.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Courses" asp-action="Index" class="btn btn-primary-custom rounded-pill px-4 py-2">
+                <i class="fa-solid fa-compass me-1"></i> Explore Courses
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light rounded-pill px-4 py-2">
+                <i class="fa-solid fa-user-plus me-1"></i> Join Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Grid of Core Features -->
+<div class="row g-4 mb-5">
+    <!-- Feature 1: SSLCommerz Payments -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-primary-subtle text-primary">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">SSLCommerz Sandbox Gateway</h4>
+            <p class="text-secondary small mb-3">
+                Seamless and secure online course purchasing using SSLCommerz Sandbox integration. Accepts debit/credit cards, mobile banking, and digital wallets.
+            </p>
+            <span class="badge bg-light text-primary border small">Live Gateway API</span>
+        </div>
+    </div>
+
+    <!-- Feature 2: Drop & Refund Statement -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-danger-subtle text-danger">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Course Drop & Refund Statement</h4>
+            <p class="text-secondary small mb-3">
+                Students can submit course drop requests with reasons. Upon admin approval, the SSLCommerz bank statement is updated with instant refunded records.
+            </p>
+            <span class="badge bg-light text-danger border small">Bank Statement Sync</span>
+        </div>
+    </div>
+
+    <!-- Feature 3: Admin Video Management -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-success-subtle text-success">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Admin Video Lecture Management</h4>
+            <p class="text-secondary small mb-3">
+                Administrators can organize courses into modules and attach high-definition video lectures, duration metrics, content summaries, and free preview options.
+            </p>
+            <span class="badge bg-light text-success border small">Curriculum Builder</span>
+        </div>
+    </div>
+
+    <!-- Feature 4: Student Video Theater -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-info-subtle text-info">
+                <i class="fa-solid fa-circle-play"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Dynamic Video Player & Progress</h4>
+            <p class="text-secondary small mb-3">
+                Students enjoy an immersive video theater experience. Progress bars calculate course completion based on watched and marked video lessons.
+            </p>
+            <span class="badge bg-light text-info border small">Real-time Progress</span>
+        </div>
+    </div>
+
+    <!-- Feature 5: Role-Based Security -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-warning-subtle text-warning">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Enterprise Security & Identity</h4>
+            <p class="text-secondary small mb-3">
+                Built on ASP.NET Core Identity with role-based authorization for Students, Admins, and Super Admins ensuring data privacy and access control.
+            </p>
+            <span class="badge bg-light text-warning border small">Identity Security</span>
+        </div>
+    </div>
+
+    <!-- Feature 6: Responsive Clean UI -->
+    <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper bg-purple-subtle text-purple" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                <i class="fa-solid fa-mobile-screen"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Modern Responsive Design</h4>
+            <p class="text-secondary small mb-3">
+                A mobile-first, glassmorphism UI with smooth animations, dark-mode elements, and clean architecture powered by .NET 8 MVC.
+            </p>
+            <span class="badge bg-light text-purple border small">Bootstrap 5 + CSS3</span>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Banner -->
+<div class="card card-custom p-5 text-center bg-light border-0 shadow-sm mb-4">
+    <h3 class="fw-bold text-dark mb-2">Ready to Start Learning?</h3>
+    <p class="text-muted mb-4">Browse our catalog of expert-led courses and upgrade your skills today.</p>
+    <div>
+        <a asp-controller="Courses" asp-action="Index" class="btn btn-primary-custom btn-lg rounded-pill px-5">
+            <i class="fa-solid fa-rocket me-2"></i> Browse Courses Now
+        </a>
+    </div>
+</div>

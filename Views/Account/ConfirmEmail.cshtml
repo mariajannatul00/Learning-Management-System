@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Email Verification";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-custom p-4 text-center shadow-lg border-0">
+            @if (ViewBag.IsConfirmed == true)
+            {
+                <div class="mb-4 text-success">
+                    <i class="fa-solid fa-circle-check fa-4x"></i>
+                </div>
+                <h3 class="fw-extrabold text-dark mb-2">Email Confirmed!</h3>
+                <p class="text-muted mb-4">
+                    Your email address has been successfully verified. You can now log in to access your student dashboard and courses.
+                </p>
+                <a asp-action="Login" class="btn btn-primary-custom w-100 py-2">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i> Log In Now
+                </a>
+            }
+            else
+            {
+                <div class="mb-4 text-danger">
+                    <i class="fa-solid fa-circle-xmark fa-4x"></i>
+                </div>
+                <h3 class="fw-extrabold text-dark mb-2">Verification Failed</h3>
+                <p class="text-muted mb-4">
+                    @(ViewBag.ErrorMessage ?? "The email confirmation link is invalid or has expired.")
+                </p>
+                <a asp-action="Login" class="btn btn-outline-custom w-100 py-2">
+                    Back to Login
+                </a>
+            }
+        </div>
+    </div>
+</div>

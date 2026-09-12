@@ -1,0 +1,293 @@
+@model LMS.Web.ViewModels.Payment.SslCommerzSandboxViewModel
+@{
+    Layout = null; // Standalone SSLCommerz Gateway Page
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSLCommerz Payment Gateway (Sandbox)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .ssl-header {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .ssl-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .ssl-nav .nav-link {
+            color: #475569;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .ssl-nav .nav-link.active {
+            color: #0284c7;
+            border-bottom-color: #0284c7;
+            background-color: #f8fafc;
+        }
+
+        .bank-badge {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .bank-badge:hover, .bank-badge.selected {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+        }
+
+        .sandbox-alert {
+            background-color: #fffbebf5;
+            border-left: 4px solid #f59e0b;
+            color: #b45309;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="ssl-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-shield-halved fa-2x"></i>
+                <div>
+                    <h5 class="fw-bold mb-0">SSLCOMMERZ</h5>
+                    <span class="small opacity-75">Secure Payment Gateway (Sandbox Environment)</span>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-warning text-dark fw-bold px-3 py-2">
+                    <i class="fa-solid fa-vial me-1"></i> SANDBOX MODE
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-4" style="max-width: 900px;">
+        <div class="sandbox-alert p-3 rounded-3 mb-4 d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fa-solid fa-triangle-exclamation fa-lg me-2"></i>
+                <strong>TEST ENVIRONMENT:</strong> Store ID: <code>@Model.StoreId</code>. No real money will be charged.
+            </div>
+            <span class="badge bg-secondary">Test Mode</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Panel: Summary -->
+            <div class="col-md-4">
+                <div class="ssl-card p-4">
+                    <h6 class="text-uppercase fw-bold text-muted small mb-3">Order Summary</h6>
+                    <div class="mb-3">
+                        <label class="small text-muted d-block">Merchant</label>
+                        <strong class="text-dark">LearnPulse LMS</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted d-block">Course</label>
+                        <strong class="text-dark">@Model.CourseTitle</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted d-block">Transaction ID</label>
+                        <span class="font-monospace small text-primary fw-bold">@Model.TransactionId</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted d-block">Customer</label>
+                        <div class="small fw-semibold text-dark">@Model.StudentName</div>
+                        <div class="small text-muted">@Model.StudentEmail</div>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark">Total Amount:</span>
+                        <h4 class="fw-bold text-success mb-0">BDT ৳@Model.Amount.ToString("F2")</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Payment Methods Tabs -->
+            <div class="col-md-8">
+                <div class="ssl-card">
+                    <ul class="nav nav-tabs ssl-nav" id="paymentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="cards-tab" data-bs-toggle="tab" data-bs-target="#cards" type="button" role="tab">
+                                <i class="fa-solid fa-credit-card me-1"></i> Cards
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mobile-tab" data-bs-toggle="tab" data-bs-target="#mobile" type="button" role="tab">
+                                <i class="fa-solid fa-mobile-screen-button me-1"></i> Mobile Banking
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="net-tab" data-bs-toggle="tab" data-bs-target="#net" type="button" role="tab">
+                                <i class="fa-solid fa-building-columns me-1"></i> Net Banking
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content p-4" id="paymentTabContent">
+                        <!-- Cards Tab -->
+                        <div class="tab-pane fade show active" id="cards" role="tabpanel">
+                            <h6 class="fw-bold mb-3">Pay with Debit / Credit Card</h6>
+                            <form asp-controller="Courses" asp-action="PaymentSuccess" method="post">
+                                <input type="hidden" name="tran_id" value="@Model.TransactionId" />
+                                <input type="hidden" name="bank_tran_id" value="@Model.BankTranId" />
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Card Number</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control font-monospace" value="4111 2222 3333 4444" placeholder="Card Number" />
+                                        <span class="input-group-text bg-white"><i class="fa-brands fa-cc-visa text-primary fa-lg"></i></span>
+                                        <span class="input-group-text bg-white"><i class="fa-brands fa-cc-mastercard text-danger fa-lg"></i></span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Expiry Date</label>
+                                        <input type="text" class="form-control" value="12/28" placeholder="MM/YY" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">CVV / CVC</label>
+                                        <input type="password" class="form-control" value="123" placeholder="123" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label small fw-semibold">Card Holder Name</label>
+                                    <input type="text" class="form-control" value="@Model.StudentName" />
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-bold rounded-3">
+                                        <i class="fa-solid fa-lock me-1"></i> Pay BDT ৳@Model.Amount.ToString("F2") (Success)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Mobile Banking Tab -->
+                        <div class="tab-pane fade" id="mobile" role="tabpanel">
+                            <h6 class="fw-bold mb-3">Select Mobile Banking Service</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-6 col-sm-3">
+                                    <div class="bank-badge selected">
+                                        <i class="fa-solid fa-wallet text-danger fa-2x mb-1 d-block"></i>
+                                        <strong class="small text-danger">bKash</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="bank-badge">
+                                        <i class="fa-solid fa-bolt text-warning fa-2x mb-1 d-block"></i>
+                                        <strong class="small text-warning">Nagad</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="bank-badge">
+                                        <i class="fa-solid fa-rocket text-purple fa-2x mb-1 d-block" style="color: #9333ea;"></i>
+                                        <strong class="small" style="color: #9333ea;">Rocket</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="bank-badge">
+                                        <i class="fa-solid fa-mobile-screen text-info fa-2x mb-1 d-block"></i>
+                                        <strong class="small text-info">Upay</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form asp-controller="Courses" asp-action="PaymentSuccess" method="post">
+                                <input type="hidden" name="tran_id" value="@Model.TransactionId" />
+                                <input type="hidden" name="bank_tran_id" value="@Model.BankTranId" />
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Mobile Wallet Account Number</label>
+                                    <input type="text" class="form-control font-monospace" value="01700000000" placeholder="017XXXXXXXX" />
+                                </div>
+
+                                <button type="submit" class="btn btn-danger w-100 btn-lg fw-bold rounded-3">
+                                    <i class="fa-solid fa-check-circle me-1"></i> Pay with bKash/Nagad (Success)
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Net Banking Tab -->
+                        <div class="tab-pane fade" id="net" role="tabpanel">
+                            <h6 class="fw-bold mb-3">Select Internet Banking Provider</h6>
+                            <div class="list-group mb-4">
+                                <label class="list-group-item d-flex align-items-center gap-3">
+                                    <input class="form-check-input me-1" type="radio" name="bank" checked>
+                                    <div>
+                                        <strong class="d-block small">Islami Bank Bangladesh (iBanking)</strong>
+                                        <span class="small text-muted">Direct account transfer</span>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex align-items-center gap-3">
+                                    <input class="form-check-input me-1" type="radio" name="bank">
+                                    <div>
+                                        <strong class="d-block small">City Touch (City Bank)</strong>
+                                        <span class="small text-muted">Internet banking gateway</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <form asp-controller="Courses" asp-action="PaymentSuccess" method="post">
+                                <input type="hidden" name="tran_id" value="@Model.TransactionId" />
+                                <input type="hidden" name="bank_tran_id" value="@Model.BankTranId" />
+                                <button type="submit" class="btn btn-success w-100 btn-lg fw-bold rounded-3">
+                                    <i class="fa-solid fa-lock me-1"></i> Confirm Net Banking Payment
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action Controls (Fail / Cancel simulation) -->
+                    <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="small text-muted">Test Options:</span>
+                        <div class="d-flex gap-2">
+                            <form asp-controller="Courses" asp-action="PaymentFail" method="post">
+                                <input type="hidden" name="tran_id" value="@Model.TransactionId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fa-solid fa-xmark me-1"></i> Simulate Payment Fail
+                                </button>
+                            </form>
+                            <form asp-controller="Courses" asp-action="PaymentCancel" method="post">
+                                <input type="hidden" name="tran_id" value="@Model.TransactionId" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa-solid fa-ban me-1"></i> Simulate Cancel
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -65,26 +65,7 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-semibold text-secondary small d-block">I want to join as:</label>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <input type="radio" class="btn-check" name="Role" id="roleStudent" value="Student" checked />
-                            <label class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1 h-100" for="roleStudent">
-                                <i class="fa-solid fa-graduation-cap fa-lg text-primary"></i>
-                                <span class="fw-bold fs-7">Student</span>
-                            </label>
-                        </div>
-                        <div class="col-6">
-                            <input type="radio" class="btn-check" name="Role" id="roleInstructor" value="Instructor" />
-                            <label class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1 h-100" for="roleInstructor">
-                                <i class="fa-solid fa-chalkboard-user fa-lg text-success"></i>
-                                <span class="fw-bold fs-7">Instructor</span>
-                            </label>
-                        </div>
-                    </div>
-                    <span asp-validation-for="Role" class="text-danger small"></span>
-                </div>
+                <input type="hidden" name="Role" value="Student" />
 
                 <button type="submit" class="btn btn-primary-custom w-100 py-2.5 mb-3">
                     <i class="fa-solid fa-user-plus me-2"></i> Register Account

@@ -14,8 +14,6 @@ namespace LMS.Web.Models
         [MaxLength(50)]
         public string LastName { get; set; } = string.Empty;
 
-        public string FullName => $"{FirstName} {LastName}".Trim();
-
         [MaxLength(255)]
         public string? ProfilePictureUrl { get; set; }
 
@@ -30,5 +28,7 @@ namespace LMS.Web.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? LastLoginDate { get; set; }
+
+        public string FullName => $"{FirstName} {LastName}".Trim();
     }
 }

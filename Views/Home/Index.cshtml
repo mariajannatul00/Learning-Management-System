@@ -1,3 +1,4 @@
+@model LMS.Web.ViewModels.Home.HomeIndexViewModel
 @{
     ViewData["Title"] = "Master New Skills Online";
 }
@@ -13,13 +14,13 @@
                 Unlock Your Potential with <span style="background: linear-gradient(135deg, #4f46e5, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LearnPulse</span>
             </h1>
             <p class="lead text-muted mb-4">
-                Access hundreds of interactive, expert-led courses in technology, business, design, and development. Learn at your own pace from anywhere in the world.
+                Access interactive, expert-led courses in technology, business, design, and development. Learn at your own pace from anywhere in the world.
             </p>
             <div class="d-flex flex-wrap gap-3 mb-4">
                 <a asp-controller="Account" asp-action="Register" class="btn btn-primary-custom btn-lg">
                     <i class="fa-solid fa-rocket me-2"></i> Get Started Free
                 </a>
-                <a href="#courses" class="btn btn-outline-custom btn-lg">
+                <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-custom btn-lg">
                     <i class="fa-solid fa-compass me-2"></i> Explore Courses
                 </a>
             </div>
@@ -38,56 +39,70 @@
 
         <div class="col-lg-6">
             <div class="position-relative">
-                <div class="card card-custom p-4 border-0 shadow-lg" style="background: linear-gradient(135deg, #1e1b4b, #312e81); color: white;">
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary text-white rounded-circle p-3">
-                                <i class="fa-solid fa-laptop-code fa-2xl"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-0 text-white">ASP.NET Core 8 Full Stack</h5>
-                                <span class="badge bg-success">Featured Course</span>
+                @if (Model.FeaturedCourse != null)
+                {
+                    <div class="card card-custom p-4 border-0 shadow-lg" style="background: linear-gradient(135deg, #1e1b4b, #312e81); color: white;">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary text-white rounded-circle p-3">
+                                    <i class="fa-solid fa-laptop-code fa-2xl"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-white">@Model.FeaturedCourse.Title</h5>
+                                    <span class="badge bg-success">Top Featured Course</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <p class="text-white-50 small mb-4">Master Clean Architecture, EF Core, Microservices, and modern UI integration step by step.</p>
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-star text-warning"></i>
-                            <span class="fw-bold text-white">4.9</span>
-                            <span class="text-white-50 small">(1,240 reviews)</span>
+                        <p class="text-white-50 small mb-4">@Model.FeaturedCourse.ShortDescription</p>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
+                            <span class="badge bg-primary-subtle text-white border border-primary-subtle">
+                                <i class="@Model.FeaturedCourse.Category?.IconClass me-1"></i> @Model.FeaturedCourse.Category?.Name
+                            </span>
+                            <span class="h4 fw-bold mb-0 text-white">৳@((Model.FeaturedCourse.DiscountPrice ?? Model.FeaturedCourse.Price).ToString("F2"))</span>
                         </div>
-                        <span class="h4 fw-bold mb-0 text-white">$49.99</span>
+
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="card card-custom p-4 border-0 shadow-lg text-center" style="background: linear-gradient(135deg, #1e1b4b, #312e81); color: white;">
+                        <div class="py-4">
+                            <i class="fa-solid fa-graduation-cap fa-4x text-primary mb-3"></i>
+                            <h4 class="fw-bold text-white mb-2">Welcome to LearnPulse LMS</h4>
+                            <p class="text-white-50 small">Explore our wide variety of industry-tailored courses and enhance your skills today.</p>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </section>
 
-<!-- Stats Banner -->
+<!-- Dynamic Stats Banner -->
 <section class="py-4 my-4">
     <div class="card card-custom p-4 bg-white shadow-sm border">
         <div class="row text-center g-4">
             <div class="col-6 col-md-3">
-                <div class="h2 fw-bold text-primary mb-0">150+</div>
-                <div class="text-muted small">Top Courses</div>
+                <div class="h2 fw-bold text-primary mb-0">@Model.TotalCoursesCount</div>
+                <div class="text-muted small">Published Courses</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="h2 fw-bold text-primary mb-0">25,000+</div>
-                <div class="text-muted small">Active Students</div>
+                <div class="h2 fw-bold text-primary mb-0">@Model.TotalStudentsCount</div>
+                <div class="text-muted small">Registered Platform Users</div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="h2 fw-bold text-primary mb-0">@Model.TotalLessonsCount</div>
+                <div class="text-muted small">Interactive Video Lessons</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="h2 fw-bold text-primary mb-0">98%</div>
-                <div class="text-muted small">Satisfaction Rate</div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="h2 fw-bold text-primary mb-0">50+</div>
-                <div class="text-muted small">Expert Mentors</div>
+                <div class="h2 fw-bold text-primary mb-0">@Model.TotalCategoriesCount</div>
+                <div class="text-muted small">Specialized Skill Categories</div>
             </div>
         </div>
     </div>
 </section>
+
 
 <!-- Features Section -->
 <section id="features" class="py-5">
